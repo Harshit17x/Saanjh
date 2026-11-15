@@ -1,0 +1,37 @@
+# Render Blueprint: one free web service running the Express app (API + web client).
+# Secrets marked `sync: false` are entered in the Render dashboard, never committed.
+services:
+  - type: web
+    name: saanjh
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: '22'
+      - key: DATA_BACKEND
+        value: memory
+      - key: GEMINI_MODEL
+        value: gemini-3.1-flash-lite
+      - key: GEMINI_FALLBACK_MODEL
+        value: gemini-flash-lite-latest
+      - key: APP_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: LINK_SECRET
+        generateValue: true
+      - key: TICK_SECRET
+        generateValue: true

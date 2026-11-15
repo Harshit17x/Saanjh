@@ -51,7 +51,7 @@ shared/  pure domain logic used by server and web: schedule maths,
 | Gmail SMTP | Sends reminder emails |
 | Google Calendar and Maps | Deep links from appointments |
 
-Gemini model: `gemini-3.8-flash` by default with a lighter fallback, both in one config constant. Confirm the id against the live model list before first use.
+Gemini model: `gemini-3.1-flash-lite` by default with `gemini-flash-lite-latest` as fallback, both configurable.
 
 ## Repo layout
 
@@ -94,13 +94,16 @@ doses/{medId_yyyymmdd_hhmm}
   circleId, medId, dueAt, status (pending | taken | skipped | missed),
   actedBy, actedAt, via (app | email | caretaker)
 
-notifications/{subjectId_kind}     created before sending; the id makes sends idempotent
-aiCache/{hash}                     safety-check results keyed by a hash of the med list
+appointments/{apptId}              top-level, with circleId, so reminders query across circles
+claims/{key}                       created before each email (and each used link); makes sends idempotent
+cache/{key}                        safety-check results keyed by a hash of the med list
 ```
+
+The medication, member and activity collections live under `circles/{id}`. Doses, appointments, claims and cache are top-level.
 
 Design notes:
 - **Doses are materialised** for today and tomorrow when a medication is created or edited, and topped up by the tick. Deterministic ids make this safe to repeat.
-- **`doses` is top-level** so the tick is a single range query on `dueAt`. Status is filtered in memory, so only the automatic single-field index is needed.
+- **`doses` and `appointments` are top-level** so the reminder run is a single range query on `dueAt` / `at` (automatic single-field indexes). The per-circle screens use two composite indexes, `(circleId, dueAt)` and `(circleId, at)`, defined in `firestore.indexes.json`.
 - **Time:** instants are stored in UTC. Schedules are stored as local wall-clock times plus the circle's timezone.
 - **Circle lookup by code** uses an equality query on `code`.
 
@@ -129,6 +132,10 @@ All routes are under `/api`, exchange JSON, are validated with Zod, and need a s
 | `GET /ai/visit-brief/:apptId` | Doctor-visit brief |
 | `GET /act/:token` (public, signed) | One-tap take or skip from an email |
 | `POST /internal/tick` (Scheduler only) | Run the reminder engine |
+| `POST /internal/digest` (Scheduler only) | Email the weekly note to every circle |
+| `POST /demo` (public) | Create a populated demo circle and sign in as its elder |
+| `POST /demo/switch/:id` | In a demo circle only, view as another member |
+| `POST /me/test-email` | Send the signed-in member a test reminder |
 | `GET /healthz` (public) | Health check |
 
 Errors use one shape: `{ error: { code, message, requestId } }`.

@@ -1,0 +1,91 @@
+/*
+ * Saanjh design tokens: a warm dusk palette.
+ * Text colours meet WCAG AA (4.5:1) on every surface; ink on paper reaches 7:1+.
+ */
+:root {
+  color-scheme: light;
+  --paper: #fbf5ea;
+  --surface: #ffffff;
+  --surface-sunk: #f4ecdc;
+  --line: #e3d7c1;
+  --line-strong: #b9ab92;
+  --ink: #1d1838;
+  --ink-soft: #48435f;
+  --primary: #2e2a6b;
+  --primary-ink: #ffffff;
+  --primary-soft: #e7e4f6;
+  --accent: #a34a06;
+  --accent-soft: #fde9cc;
+  --sun: #f2a93b;
+  --rose: #c2577a;
+  --ok: #1d6b47;
+  --ok-soft: #dcf1e6;
+  --warn: #8a4b00;
+  --warn-soft: #fdebd2;
+  --bad: #a12d2d;
+  --bad-soft: #fbe2e2;
+  --focus: #0b57d0;
+
+  --sky-dawn: linear-gradient(180deg, #ffd9a8 0%, #ffeccc 55%, #fbf5ea 100%);
+  --sky-day: linear-gradient(180deg, #bfe0f5 0%, #e5f1f6 55%, #fbf5ea 100%);
+  --sky-dusk: linear-gradient(180deg, #3a2f74 0%, #b4527c 52%, #f6a65a 100%);
+  --sky-night: linear-gradient(180deg, #0f0d29 0%, #262058 60%, #3d3378 100%);
+
+  --font-body:
+    'Atkinson Hyperlegible', 'Noto Sans Devanagari', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces Variable', 'Noto Sans Devanagari', Georgia, serif;
+
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --shadow: 0 1px 2px rgb(29 24 56 / 6%), 0 8px 24px rgb(29 24 56 / 8%);
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --tap: 3rem;
+  --tap-large: 3.75rem;
+  --content: 68rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --paper: #12102a;
+    --surface: #1c1a3a;
+    --surface-sunk: #171531;
+    --line: #34305c;
+    --line-strong: #5a5490;
+    --ink: #f7efe0;
+    --ink-soft: #cdc6e2;
+    --primary: #f2b25a;
+    --primary-ink: #1d1838;
+    --primary-soft: #2c2852;
+    --accent: #f6b86a;
+    --accent-soft: #3a2c25;
+    --ok: #7fd6a8;
+    --ok-soft: #173a2b;
+    --warn: #f3c37a;
+    --warn-soft: #3d2f17;
+    --bad: #f3a3a3;
+    --bad-soft: #3f1d24;
+    --focus: #8ab4ff;
+    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 35%);
+    --sky-dawn: linear-gradient(180deg, #3d2f63 0%, #8c5470 60%, #1c1a3a 100%);
+    --sky-day: linear-gradient(180deg, #24406b 0%, #2c3f66 60%, #1c1a3a 100%);
+  }
+}
+
+/* Text size chosen by the person, independent of browser zoom. */
+html {
+  font-size: 112.5%; /* 18px base */
+}
+html[data-text-size='1'] {
+  font-size: 125%;
+}
+html[data-text-size='2'] {
+  font-size: 140%;
+}

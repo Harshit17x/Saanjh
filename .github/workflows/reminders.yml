@@ -1,0 +1,25 @@
+name: Reminder run
+
+# Triggers the reminder engine every 5 minutes (GitHub runs schedules on a best-effort basis).
+# Repository secrets: SAANJH_URL (e.g. https://saanjh.onrender.com) and TICK_SECRET (same value as the server's).
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Call the reminder engine
+        env:
+          SAANJH_URL: ${{ secrets.SAANJH_URL }}
+          TICK_SECRET: ${{ secrets.TICK_SECRET }}
+        run: |
+          if [ -z "$SAANJH_URL" ] || [ -z "$TICK_SECRET" ]; then echo "Secrets not set; skipping."; exit 0; fi
+          # Wake the service first (free instances sleep when idle), then run reminders.
+          curl -fsS --retry 5 --retry-delay 10 --retry-all-errors "$SAANJH_URL/healthz" > /dev/null
+          curl -fsS --retry 3 --retry-delay 5 -X POST -H "Authorization: Bearer $TICK_SECRET" "$SAANJH_URL/api/internal/tick"

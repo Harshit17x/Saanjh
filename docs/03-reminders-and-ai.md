@@ -12,6 +12,8 @@ Cloud Scheduler calls `POST /api/internal/tick` every 5 minutes with an OIDC tok
 4. **Claim.** Create a `notifications` document whose id is `subjectId_kind`. If it already exists, skip: someone has sent it.
 5. **Send** through the `Mailer` port. On failure, delete the claim so the next tick retries, and log the error.
 
+Claims are per recipient (`dose_<id>_<stage>_<memberId>`), so a partial failure never re-sends to someone who already received the email. Demo circles are skipped.
+
 ### Escalation table
 
 | Stage | When | To |
@@ -21,7 +23,7 @@ Cloud Scheduler calls `POST /api/internal/tick` every 5 minutes with an OIDC tok
 | Missed | 60 minutes after, still pending; status becomes `missed` | Family and caretakers with notifications on |
 | Appointment | 24 hours and 2 hours before | Whole circle |
 | Low stock | Under 5 days of supply, once per medication | Whole circle |
-| Weekly digest | Sunday 6 pm in the circle's timezone | Whole circle |
+| Weekly digest | Separate weekly Scheduler job (`/internal/digest`, Sunday 18:00 IST) | Whole circle |
 
 All thresholds are named constants in `shared/escalation.ts`.
 
@@ -47,7 +49,7 @@ All thresholds are named constants in `shared/escalation.ts`.
 2. **Structured output.** Each call supplies a JSON schema; the server validates the result again with Zod. One retry on invalid output, then a deterministic fallback.
 3. **Untrusted text is fenced.** User-entered names and notes are wrapped in delimiters and described as data in the system instruction. Instructions inside them are ignored.
 4. **A human confirms** anything that would change a schedule.
-5. **Graceful failure.** An 8-second timeout. If Gemini is unavailable the feature still returns something useful and says so.
+5. **Graceful failure.** An 12-second timeout. If Gemini is unavailable the feature still returns something useful and says so.
 6. **Cost control.** Cached safety checks, downscaled images, token usage logged per call.
 7. **Not medical advice.** Every AI surface says to confirm with a doctor or pharmacist.
 

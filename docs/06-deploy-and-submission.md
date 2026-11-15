@@ -17,14 +17,17 @@ Docker is not needed locally: Cloud Build builds the image from source.
 ## Runbook
 
 1. **Project.** Confirm billing. Enable the Cloud Run, Cloud Build, Artifact Registry, Firestore, Secret Manager and Cloud Scheduler APIs.
-2. **Firestore.** Create the default database in native mode in `asia-south1`.
+2. **Firestore.** Create the default database in native mode in `asia-south1`, then create the two composite indexes from `firestore.indexes.json`:
+   `gcloud firestore indexes composite create --collection-group=doses --field-config=field-path=circleId,order=ascending --field-config=field-path=dueAt,order=ascending` and the same for `appointments` with `at`.
 3. **Secrets.** Create `GEMINI_API_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `SESSION_SECRET` and `LINK_SECRET`. The last two are generated random values.
 4. **Service accounts.**
    - `saanjh-run`: Firestore user and secret accessor only.
    - `saanjh-scheduler`: Cloud Run invoker on the service only.
 5. **Deploy.** `gcloud run deploy saanjh --source . --region asia-south1 --allow-unauthenticated --min-instances 1`, running as `saanjh-run`, with the secrets mounted as environment variables.
-6. **Scheduler.** A job every 5 minutes that POSTs to `/api/internal/tick` with an OIDC token from `saanjh-scheduler`.
-7. **Verify.** Run `scripts/smoke.mjs` against the live URL. Send a real reminder to the owner's inbox and use its one-tap link.
+6. **Scheduler.** Two jobs with an OIDC token from `saanjh-scheduler` and audience `<APP_URL>/api/internal`:
+   - `saanjh-tick`: every 5 minutes, POST `/api/internal/tick`.
+   - `saanjh-digest`: `0 18 * * 0` (Asia/Kolkata), POST `/api/internal/digest`.
+7. **Verify.** Run `npm run smoke -- <live URL>`. Use **Send me a test email** on the Circle page, then add a dose due in 12 minutes and use the one-tap link in the reminder.
 8. **GitHub.** Create the public repo `saanjh`, push `main`, confirm CI is green.
 
 Deploy a walking skeleton by about 1:00 pm so the link works from then on.
@@ -38,7 +41,9 @@ Deploy a walking skeleton by about 1:00 pm so the link works from then on.
 | `GMAIL_USER`, `GMAIL_APP_PASSWORD` | Email sending |
 | `SESSION_SECRET`, `LINK_SECRET` | Signing sessions and email links |
 | `APP_URL` | Public URL used in emails |
-| `SCHEDULER_SA` | Service account allowed to call the tick |
+| `SCHEDULER_SA` | Service account allowed to call the internal endpoints |
+| `DATA_BACKEND` | `firestore` in production, `memory` locally |
+| `NODE_ENV` | `production` on Cloud Run (enables Secure cookies, HSTS, required secrets) |
 | `GOOGLE_CLOUD_PROJECT` | Firestore project (set by Cloud Run) |
 
 ## Before each scored submission

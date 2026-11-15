@@ -75,6 +75,10 @@ Each member has a permission set by the elder: **view only** or **manage**.
 
 **Before an appointment.** Reminders at 24 hours and 2 hours → open the visit brief → print or show it to the doctor.
 
+## Demo circle
+
+**Try a demo circle** on the landing page creates a fully populated circle (Kamla Devi, her daughter Priya and caretaker Ravi, four medicines, two weeks of history, a pending proposal, a low-stock medicine and two appointments) and signs in as the elder. A banner shows the code and passcode and switches between members, so a reviewer sees every role in under a minute. Demo circles never send email.
+
 ## Stretch (only if ahead of schedule)
 
 - **Ask Saanjh:** an assistant that answers questions about the profile using Gemini function calling over read-only tools.

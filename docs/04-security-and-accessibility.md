@@ -81,4 +81,4 @@ Target: WCAG 2.2 AA everywhere; the elder's Today view goes further.
 
 ## Visual direction
 
-Warm dusk palette: deep indigo, amber and soft cream. Generous spacing, a single typeface, no decorative motion.
+Warm dusk palette: deep indigo, amber and soft cream. **Atkinson Hyperlegible** (designed by the Braille Institute for low-vision readers) for body text, **Fraunces** for headings, Noto Sans Devanagari for Hindi, all self-hosted so the CSP stays strict. The Today screen's **sky arc** draws the day as the sun's path from dawn to dusk with each dose on it; the sky colour follows the real time of day. No decorative motion.
