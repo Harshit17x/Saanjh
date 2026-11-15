@@ -96,7 +96,7 @@ export function createApp(deps: Deps, options: AppOptions = {}): Express {
     app.use(express.static(staticDir, { index: false, maxAge: '1h' }));
     // Single-page app: any other GET renders the client, which handles routing.
     app.use((req, res, next) => {
-      if (req.method !== 'GET') return next();
+      if (req.method !== 'GET' && req.method !== 'HEAD') return next();
       res.setHeader('Cache-Control', 'no-cache');
       res.sendFile(path.join(staticDir, 'index.html'));
     });

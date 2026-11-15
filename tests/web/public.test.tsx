@@ -47,7 +47,7 @@ describe('Landing', () => {
       ),
     });
     renderApp('/');
-    await userEvent.click(await screen.findByRole('button', { name: 'Try a demo circle' }));
+    await userEvent.click((await screen.findAllByRole('button', { name: 'Try a demo circle' }))[0]!);
     expect(await screen.findByText(/medicines taken today/)).toBeInTheDocument();
     expect(await screen.findByText(/Code QLJC-8PSW · passcode 246810/)).toBeInTheDocument();
   });
@@ -61,9 +61,10 @@ describe('Landing', () => {
       },
     });
     renderApp('/');
-    await userEvent.click(await screen.findByRole('button', { name: 'Try a demo circle' }));
+    await userEvent.click((await screen.findAllByRole('button', { name: 'Try a demo circle' }))[0]!);
     expect(await screen.findByRole('alert')).toHaveTextContent('Too many requests');
-    expect(screen.getByRole('button', { name: 'Try a demo circle' })).toBeEnabled();
+    for (const button of screen.getAllByRole('button', { name: 'Try a demo circle' }))
+      expect(button).toBeEnabled();
   });
 
   it('sends signed-in people from the landing page to Today', async () => {

@@ -5,23 +5,26 @@ import {
   CircleSlash,
   Pill,
   PartyPopper,
+  Siren,
   Undo2,
   Volume2,
   VolumeX,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import type { TodayResponse } from '../../../shared/api';
+import type { AdherenceResponse, CircleResponse, TodayResponse } from '../../../shared/api';
 import { localTime } from '../../../shared/time';
 import type { Dose, Medication } from '../../../shared/types';
 import { api, messageOf } from '../api/client';
+import { CircleStrip, ProgressRing, StatTiles } from '../components/Dashboard';
 import { SkyArc, skyPhase } from '../components/SkyArc';
+import { CheckInCard, HelpButton } from '../components/Wellbeing';
 import { FormError, LoadState, PageHeading, StatusBadge, Toast } from '../components/ui';
 import { usePreferences } from '../hooks/usePreferences';
 import { useResource } from '../hooks/useResource';
 import { canRecordDoses, isElder, useActiveSession } from '../hooks/useSession';
 import { useI18n, type Translate } from '../i18n';
-import { formatDate, formatDateTime, formatWallTime } from '../lib/format';
+import { formatDate, formatDateTime, formatTime, formatWallTime } from '../lib/format';
 
 const REFRESH_MS = 2 * 60_000;
 
@@ -120,6 +123,8 @@ export function Today() {
   const { circle, member } = useActiveSession();
   const { announce } = usePreferences();
   const today = useResource(() => api.get<TodayResponse>('/today'), member.id);
+  const week = useResource(() => api.get<AdherenceResponse>('/adherence?days=7'), member.id);
+  const people = useResource(() => api.get<CircleResponse>('/circle'), member.id);
   const [toast, setToast] = useState<{ message: string; dose: Dose } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [speaking, setSpeaking] = useState(false);
@@ -148,7 +153,7 @@ export function Today() {
         setToast({ message, dose });
         announce(message);
       }
-      await reload();
+      await Promise.all([reload(), week.reload()]);
     } catch (error) {
       setActionError(messageOf(error));
     }
@@ -214,15 +219,40 @@ export function Today() {
                 : t('today.summaryNone')}
             </p>
           </div>
-          {speechAvailable && (
-            <button type="button" className="btn" onClick={toggleSpeech} aria-pressed={speaking}>
-              {speaking ? <VolumeX aria-hidden="true" /> : <Volume2 aria-hidden="true" />}
-              {speaking ? t('today.stopReading') : t('today.readAloud')}
-            </button>
-          )}
+          <div className="today-hero-tools">
+            {data.doses.length > 0 && (
+              <ProgressRing
+                value={taken}
+                total={data.doses.length}
+                label={t('today.ringLabel', { taken, total: data.doses.length })}
+              />
+            )}
+            {speechAvailable && (
+              <button type="button" className="btn" onClick={toggleSpeech} aria-pressed={speaking}>
+                {speaking ? <VolumeX aria-hidden="true" /> : <Volume2 aria-hidden="true" />}
+                {speaking ? t('today.stopReading') : t('today.readAloud')}
+              </button>
+            )}
+          </div>
         </div>
         <SkyArc doses={data.doses} nowMinutes={nowMinutes} label={t('today.sky')} />
       </section>
+
+      {data.helpRequest && (
+        <div className="notice notice-bad help-banner" role="alert">
+          <Siren aria-hidden="true" />
+          <p>
+            <strong>
+              {t('help.banner', {
+                name: data.helpRequest.byName,
+                time: formatTime(data.helpRequest.at, circle.timezone, locale),
+              })}
+            </strong>
+          </p>
+        </div>
+      )}
+
+      <StatTiles today={data} week={week.data} />
 
       <FormError message={actionError} />
 
@@ -296,6 +326,21 @@ export function Today() {
       )}
 
       <div className="grid-2">
+        <CheckInCard
+          checkIn={data.checkIn}
+          elderView={isElder(member)}
+          elderName={circle.elderName}
+          timeZone={circle.timezone}
+          onSaved={() => void reload()}
+        />
+        {isElder(member) || member.role === 'caretaker' ? (
+          <HelpButton onSent={() => void reload()} />
+        ) : (
+          people.data && <CircleStrip members={people.data.members} selfId={member.id} />
+        )}
+      </div>
+
+      <div className="grid-2">
         <section className="card" aria-labelledby="schedule-title">
           <h2 id="schedule-title">{t('today.schedule')}</h2>
           {data.doses.length === 0 ? (
@@ -353,27 +398,32 @@ export function Today() {
           )}
         </section>
 
-        <section className="card" aria-labelledby="visit-title">
-          <div className="card-head">
-            <h2 id="visit-title">{t('today.nextVisit')}</h2>
-            <CalendarHeart aria-hidden="true" />
-          </div>
-          {data.nextAppointment ? (
-            <div className="stack">
-              <p className="list-item-title">{data.nextAppointment.doctor}</p>
-              <p className="muted">
-                {data.nextAppointment.speciality && `${data.nextAppointment.speciality} · `}
-                {formatDateTime(data.nextAppointment.at, circle.timezone, locale)}
-              </p>
-              {data.nextAppointment.place && <p>{data.nextAppointment.place}</p>}
-              <Link className="btn" to={`/appointments/${data.nextAppointment.id}/brief`}>
-                {t('appts.brief')}
-              </Link>
+        <div className="stack-l">
+          <section className="card" aria-labelledby="visit-title">
+            <div className="card-head">
+              <h2 id="visit-title">{t('today.nextVisit')}</h2>
+              <CalendarHeart aria-hidden="true" />
             </div>
-          ) : (
-            <p className="muted">{t('today.noVisit')}</p>
+            {data.nextAppointment ? (
+              <div className="stack">
+                <p className="list-item-title">{data.nextAppointment.doctor}</p>
+                <p className="muted">
+                  {data.nextAppointment.speciality && `${data.nextAppointment.speciality} · `}
+                  {formatDateTime(data.nextAppointment.at, circle.timezone, locale)}
+                </p>
+                {data.nextAppointment.place && <p>{data.nextAppointment.place}</p>}
+                <Link className="btn" to={`/appointments/${data.nextAppointment.id}/brief`}>
+                  {t('appts.brief')}
+                </Link>
+              </div>
+            ) : (
+              <p className="muted">{t('today.noVisit')}</p>
+            )}
+          </section>
+          {(isElder(member) || member.role === 'caretaker') && people.data && (
+            <CircleStrip members={people.data.members} selfId={member.id} />
           )}
-        </section>
+        </div>
       </div>
 
       {toast && (

@@ -1,6 +1,6 @@
 # Saanjh — overview
 
-*Saanjh (सांझ): dusk, the golden hours. It also echoes "saanjha": shared.*
+_Saanjh (सांझ): dusk, the golden hours. It also echoes "saanjha": shared._
 
 **Tagline:** Shared care for the golden hours.
 
@@ -20,13 +20,14 @@ PromptWars x Catalyst (Google for Developers, Hack2Skill, MnM). Solo, 15 Novembe
 
 ## How it is judged
 
-| Stage | What happens | What matters |
-|---|---|---|
-| Round 1 | Automated AI review of the GitHub repo; live leaderboard | Code Quality, Security, Efficiency, Testing, Accessibility, Problem Statement Alignment, effective use of Google services |
-| Top 10 gate | Deployed link is checked | The Cloud Run link must be working, or the entry is disqualified |
-| Round 2 | Jury reviews the live project (no pitch) | Idea uniqueness, relevance, UI, repo structure, code quality, scalability |
+| Stage       | What happens                                             | What matters                                                                                                              |
+| ----------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Round 1     | Automated AI review of the GitHub repo; live leaderboard | Code Quality, Security, Efficiency, Testing, Accessibility, Problem Statement Alignment, effective use of Google services |
+| Top 10 gate | Deployed link is checked                                 | The Cloud Run link must be working, or the entry is disqualified                                                          |
+| Round 2     | Jury reviews the live project (no pitch)                 | Idea uniqueness, relevance, UI, repo structure, code quality, scalability                                                 |
 
 Rules that shape the build:
+
 - At most **2 scored submissions**. **The last one counts, not the best one.**
 - One retry is allowed only for a technical failure of the submission itself.
 - Required at submission (4:30–5:00 pm): public GitHub repo link, deployed project link, short description, LinkedIn post link.
@@ -46,15 +47,15 @@ Rules that shape the build:
 
 ## Document map
 
-| File | Content |
-|---|---|
-| [01-product.md](01-product.md) | Roles, features, user flows |
-| [02-architecture.md](02-architecture.md) | Layers, stack, Google services, data model, API |
-| [03-reminders-and-ai.md](03-reminders-and-ai.md) | Reminder engine and Gemini design |
-| [04-security-and-accessibility.md](04-security-and-accessibility.md) | Security and accessibility checklists |
-| [05-testing-and-quality.md](05-testing-and-quality.md) | Test strategy, CI, conventions |
-| [06-deploy-and-submission.md](06-deploy-and-submission.md) | Deploy runbook and submission checklist |
-| [07-build-timeline.md](07-build-timeline.md) | Time-boxed schedule with cut lines |
+| File                                                                 | Content                                         |
+| -------------------------------------------------------------------- | ----------------------------------------------- |
+| [01-product.md](01-product.md)                                       | Roles, features, user flows                     |
+| [02-architecture.md](02-architecture.md)                             | Layers, stack, Google services, data model, API |
+| [03-reminders-and-ai.md](03-reminders-and-ai.md)                     | Reminder engine and Gemini design               |
+| [04-security-and-accessibility.md](04-security-and-accessibility.md) | Security and accessibility checklists           |
+| [05-testing-and-quality.md](05-testing-and-quality.md)               | Test strategy, CI, conventions                  |
+| [06-deploy-and-submission.md](06-deploy-and-submission.md)           | Deploy runbook and submission checklist         |
+| [07-build-timeline.md](07-build-timeline.md)                         | Time-boxed schedule with cut lines              |
 
 ## Research behind the plan
 

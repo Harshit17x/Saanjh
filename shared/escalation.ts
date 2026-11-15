@@ -55,7 +55,7 @@ const reachable = (m: PublicMember): boolean => m.notify && m.email !== null && 
  * email, caretakers receive the elder's reminders instead.
  */
 export function recipientsFor(
-  stage: DoseStage | AppointmentStage | 'lowStock' | 'digest',
+  stage: DoseStage | AppointmentStage | 'lowStock' | 'digest' | 'help',
   members: PublicMember[],
 ): PublicMember[] {
   const elder = members.filter((m) => m.role === 'elder' && reachable(m));
@@ -65,6 +65,7 @@ export function recipientsFor(
     case 'nudge':
       return elder.length > 0 ? elder : others.filter((m) => m.role === 'caretaker');
     case 'missed':
+    case 'help':
       return others;
     case 'appt24h':
     case 'appt2h':

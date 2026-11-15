@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { LANGUAGES, MED_FORMS, PERMISSIONS } from './types';
+import { LANGUAGES, MED_FORMS, MOODS, PERMISSIONS } from './types';
 import { isValidTimeZone } from './time';
 
 /** Input validation for every API request. Limits keep payloads and storage small. */
@@ -126,6 +126,13 @@ export const scanSchema = z.object({
     .max(1_400_000)
     .regex(/^[A-Za-z0-9+/]+=*$/, 'Image must be base64'),
 });
+
+export const checkInSchema = z.object({
+  mood: z.enum(MOODS),
+  note: z.string().trim().max(200).default(''),
+});
+
+export const helpSchema = z.object({ note: z.string().trim().max(200).default('') });
 
 export type CreateCircleInput = z.infer<typeof createCircleSchema>;
 export type JoinInput = z.infer<typeof joinSchema>;

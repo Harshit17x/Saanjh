@@ -14,6 +14,9 @@ import { useI18n } from '../i18n';
 import { prepareImage } from '../lib/image';
 import { formatWallTime } from '../lib/format';
 
+/** A month's supply fills the supply bar. */
+const SUPPLY_FULL_DAYS = 30;
+
 type Editing = { mode: 'add'; initial: MedicationFields } | { mode: 'edit'; med: Medication } | null;
 
 const toFields = (med: Medication): MedicationFields => ({
@@ -316,6 +319,18 @@ export function Medicines() {
                           : med.daysOfWeek.map((d) => t(DAY_KEYS[d] ?? 'day.0')).join(', ')}
                         {med.notes && ` · ${med.notes}`}
                       </p>
+                      {days !== null && (
+                        <div className="supply">
+                          <span className="small muted">{t('meds.supply')}</span>
+                          <span className="meter" data-low={needsRefill(med)} aria-hidden="true">
+                            <span
+                              style={{
+                                width: `${Math.min(100, Math.round((days / SUPPLY_FULL_DAYS) * 100))}%`,
+                              }}
+                            />
+                          </span>
+                        </div>
+                      )}
                     </div>
                     {manager && (
                       <div className="list-item-actions">

@@ -168,6 +168,8 @@ export const todayResponse = (overrides: Partial<TodayResponse> = {}): TodayResp
   nextAppointment: appointment(),
   proposals: [proposedMed],
   lowStock: [{ medId: 'med-2', medName: 'Atorvastatin', daysLeft: 3 }],
+  checkIn: null,
+  helpRequest: null,
   ...overrides,
 });
 
@@ -191,6 +193,12 @@ export const adherenceResponse = (days = 7): AdherenceResponse => ({
     { medId: 'med-1', medName: 'Amlodipine', taken: 7, skipped: 0, missed: 0, pending: 0, rate: 1 },
     { medId: 'med-3', medName: 'Metformin', taken: 9, skipped: 0, missed: 3, pending: 0, rate: 0.75 },
     { medId: 'med-9', medName: 'Unused', taken: 0, skipped: 0, missed: 0, pending: 1, rate: null },
+  ],
+  byPeriod: [
+    { period: 'morning', taken: 14, skipped: 0, missed: 0, pending: 0, rate: 1 },
+    { period: 'afternoon', taken: 0, skipped: 0, missed: 0, pending: 0, rate: null },
+    { period: 'evening', taken: 6, skipped: 0, missed: 3, pending: 0, rate: 6 / 9 },
+    { period: 'night', taken: 5, skipped: 1, missed: 0, pending: 0, rate: 5 / 6 },
   ],
   streakDays: 4,
 });

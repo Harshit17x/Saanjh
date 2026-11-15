@@ -8,8 +8,9 @@ import type { Actor, Deps } from '../context';
 import { AppError, forbidden, notFound } from '../errors';
 import type { LinkAction } from '../security/actionLinks';
 import { isElder, requireDoseRecorder } from './access';
-import { recordActivity } from './activity';
+import { ACTIVITY_LIMIT, recordActivity } from './activity';
 import { pendingProposals, topUpCircle } from './medications';
+import { wellbeingFrom } from './wellbeing';
 
 export type DoseAction = 'take' | 'skip' | 'undo';
 
@@ -35,10 +36,11 @@ export async function today(deps: Deps, actor: Actor): Promise<TodayResponse> {
   if (circle.materialisedThrough < addDays(date, 1)) await topUpCircle(deps, circle);
 
   const [from, to] = dayBounds(circle, date, date);
-  const [doses, appointments, meds] = await Promise.all([
+  const [doses, appointments, meds, activity] = await Promise.all([
     deps.repo.listDosesForCircle(circle.id, from, to),
     deps.repo.listAppointments(circle.id),
     deps.repo.listMedications(circle.id),
+    deps.repo.listActivity(circle.id, ACTIVITY_LIMIT),
   ]);
   return {
     date,
@@ -49,6 +51,7 @@ export async function today(deps: Deps, actor: Actor): Promise<TodayResponse> {
     lowStock: meds
       .filter((m) => m.status === 'active' && needsRefill(m))
       .map((m) => ({ medId: m.id, medName: m.name, daysLeft: daysOfSupply(m) ?? 0 })),
+    ...wellbeingFrom(activity, circle.timezone, now),
   };
 }
 

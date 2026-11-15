@@ -66,8 +66,23 @@ if (pending) {
   check('dose undo', undo.res.status === 200);
 }
 
+const checkin = await call('POST', '/api/checkin', { mood: 'good', note: 'Slept well' });
+check('wellbeing check-in', checkin.res.status === 201 && checkin.json?.mood === 'good');
+
+const help = await call('POST', '/api/help', {});
+check('call for help recorded', help.res.status === 201 && typeof help.json?.notified === 'number');
+
+const after = await call('GET', '/api/today');
+check(
+  'today shows check-in and help',
+  after.json?.checkIn?.mood === 'good' && Boolean(after.json?.helpRequest),
+);
+
 const adherence = await call('GET', '/api/adherence?days=7');
-check('adherence computed', typeof adherence.json?.overall?.taken === 'number');
+check(
+  'adherence computed',
+  typeof adherence.json?.overall?.taken === 'number' && adherence.json?.byPeriod?.length === 4,
+);
 
 const safety = await call('POST', '/api/ai/safety-check', {});
 check('safety check answers', safety.res.status === 200 && Array.isArray(safety.json?.cautions));

@@ -139,8 +139,24 @@ export const ACTIVITY_ACTIONS = [
   'appt.created',
   'appt.updated',
   'appt.deleted',
+  'help.requested',
+  'wellbeing.checkin',
 ] as const;
 export type ActivityAction = (typeof ACTIVITY_ACTIONS)[number];
+
+/** How the elder says they feel in the daily check-in, best to worst. */
+export const MOODS = ['great', 'good', 'okay', 'low', 'unwell'] as const;
+export type Mood = (typeof MOODS)[number];
+
+/** Check-ins that family should hear about the same day. */
+export const CONCERNING_MOODS: readonly Mood[] = ['low', 'unwell'];
+
+export interface CheckIn {
+  mood: Mood;
+  note: string;
+  at: number;
+  byName: string;
+}
 
 export interface Activity {
   id: string;
@@ -148,7 +164,9 @@ export interface Activity {
   actorId: string;
   actorName: string;
   action: ActivityAction;
-  /** What the action was about, e.g. a medication name. */
+  /** What the action was about, e.g. a medication name, or the mood of a check-in. */
   subject: string;
+  /** Optional free text, such as the note on a check-in or a call for help. */
+  detail?: string;
   at: number;
 }

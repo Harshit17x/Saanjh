@@ -41,13 +41,8 @@ p {
   margin: 0 0 var(--space-3);
 }
 a {
-  color: var(--primary);
+  color: var(--link);
   text-underline-offset: 0.18em;
-}
-@media (prefers-color-scheme: dark) {
-  a {
-    color: var(--accent);
-  }
 }
 img,
 svg {
@@ -242,6 +237,10 @@ svg {
     min-width: 2.25rem;
     padding: 0 var(--space-2);
   }
+  /* Sign out stays available on the Circle page. */
+  .topbar .signout {
+    display: none;
+  }
 }
 .bottomnav {
   display: none;
@@ -328,23 +327,13 @@ svg {
 }
 .btn-accent {
   --btn-bg: var(--accent);
-  --btn-ink: #ffffff;
+  --btn-ink: var(--on-accent);
   --btn-line: var(--accent);
-}
-@media (prefers-color-scheme: dark) {
-  .btn-accent {
-    --btn-ink: #1d1838;
-  }
 }
 .btn-ok {
   --btn-bg: var(--ok);
-  --btn-ink: #ffffff;
+  --btn-ink: var(--on-ok);
   --btn-line: var(--ok);
-}
-@media (prefers-color-scheme: dark) {
-  .btn-ok {
-    --btn-ink: #10261b;
-  }
 }
 .btn-ghost {
   --btn-bg: transparent;
@@ -605,13 +594,8 @@ fieldset {
 }
 .badge-primary {
   background: var(--primary-soft);
-  color: var(--primary);
+  color: var(--primary-soft-ink);
   border-color: transparent;
-}
-@media (prefers-color-scheme: dark) {
-  .badge-primary {
-    color: var(--ink);
-  }
 }
 .notice {
   display: flex;

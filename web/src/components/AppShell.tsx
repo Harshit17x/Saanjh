@@ -1,4 +1,4 @@
-import { CalendarHeart, HeartHandshake, LineChart, LogOut, Pill, Sun } from 'lucide-react';
+import { CalendarHeart, HeartHandshake, LineChart, LogOut, Moon, Pill, Sun } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 import type { CircleResponse, SessionResponse } from '../../../shared/api';
@@ -38,6 +38,24 @@ function TextSizeControl() {
         </button>
       ))}
     </div>
+  );
+}
+
+/** Switches between light and dark; the choice is remembered on this device. */
+export function ThemeToggle() {
+  const { t } = useI18n();
+  const { theme, toggleTheme } = usePreferences();
+  const label = theme === 'dark' ? t('tools.themeLight') : t('tools.themeDark');
+  return (
+    <button
+      type="button"
+      className="btn btn-ghost icon-btn theme-toggle"
+      onClick={toggleTheme}
+      aria-label={label}
+      title={label}
+    >
+      {theme === 'dark' ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
+    </button>
   );
 }
 
@@ -146,9 +164,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="topbar-tools">
             <TextSizeControl />
             <LanguageControl />
+            <ThemeToggle />
             <button
               type="button"
-              className="btn btn-ghost icon-btn"
+              className="btn btn-ghost icon-btn signout"
               onClick={() => void handleSignOut()}
               aria-label={t('tools.signOut')}
               title={t('tools.signOut')}

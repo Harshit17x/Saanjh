@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import type { LookupResponse, SessionResponse } from '../../../shared/api';
 import type { Language } from '../../../shared/types';
 import { api, ApiError, messageOf } from '../api/client';
-import { LanguageControl } from '../components/AppShell';
+import { LanguageControl, ThemeToggle } from '../components/AppShell';
 import { LogoMark } from '../components/Logo';
 import { PasscodeField } from '../components/PasscodeField';
 import { Avatar, FormError, PageHeading, SelectField, TextField } from '../components/ui';
@@ -23,6 +23,7 @@ function AuthLayout({ title, lede, children }: { title: string; lede?: string; c
           </a>
           <div className="topbar-tools">
             <LanguageControl />
+            <ThemeToggle />
           </div>
         </div>
       </header>

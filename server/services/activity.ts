@@ -11,6 +11,7 @@ export async function recordActivity(
   actor: Actor,
   action: ActivityAction,
   subject: string,
+  detail?: string,
 ): Promise<void> {
   await deps.repo.addActivity({
     id: newId(),
@@ -19,6 +20,7 @@ export async function recordActivity(
     actorName: actor.member.name,
     action,
     subject,
+    ...(detail ? { detail } : {}),
     at: deps.clock.now(),
   });
 }

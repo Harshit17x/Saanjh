@@ -264,6 +264,7 @@ describe('template digest', () => {
       { medId: 'm', medName: 'Metformin', ...tally(2, 2) },
       { medId: 'n', medName: 'Amlodipine', ...tally(4, 0) },
     ],
+    byPeriod: [],
     streakDays,
   });
   const empty: AdherenceSummary = {
@@ -272,6 +273,7 @@ describe('template digest', () => {
     overall: { taken: 0, missed: 0, skipped: 0, pending: 0, rate: null },
     byDay: [],
     byMedication: [],
+    byPeriod: [],
     streakDays: 0,
   };
 

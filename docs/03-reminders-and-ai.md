@@ -16,14 +16,14 @@ Claims are per recipient (`dose_<id>_<stage>_<memberId>`), so a partial failure 
 
 ### Escalation table
 
-| Stage | When | To |
-|---|---|---|
-| Upcoming | 10 minutes before the dose | Elder |
-| Nudge | 20 minutes after, still pending | Elder |
-| Missed | 60 minutes after, still pending; status becomes `missed` | Family and caretakers with notifications on |
-| Appointment | 24 hours and 2 hours before | Whole circle |
-| Low stock | Under 5 days of supply, once per medication | Whole circle |
-| Weekly digest | Separate weekly Scheduler job (`/internal/digest`, Sunday 18:00 IST) | Whole circle |
+| Stage         | When                                                                 | To                                          |
+| ------------- | -------------------------------------------------------------------- | ------------------------------------------- |
+| Upcoming      | 10 minutes before the dose                                           | Elder                                       |
+| Nudge         | 20 minutes after, still pending                                      | Elder                                       |
+| Missed        | 60 minutes after, still pending; status becomes `missed`             | Family and caretakers with notifications on |
+| Appointment   | 24 hours and 2 hours before                                          | Whole circle                                |
+| Low stock     | Under 5 days of supply, once per medication                          | Whole circle                                |
+| Weekly digest | Separate weekly Scheduler job (`/internal/digest`, Sunday 18:00 IST) | Whole circle                                |
 
 All thresholds are named constants in `shared/escalation.ts`.
 
@@ -55,16 +55,17 @@ All thresholds are named constants in `shared/escalation.ts`.
 
 ### Features
 
-| Feature | Input | Output | Fallback |
-|---|---|---|---|
-| Prescription scan | Image, at most 1 MB after downscale | `medications[]: { name, dose, form, times[], withFood, confidence }` | Manual entry form with a note |
-| Safety check | Medication list | `cautions[]: { severity, medsInvolved[], explanation, questionForDoctor }` | Rule-based duplicate and timing checks |
-| Weekly digest | Statistics computed by code | `{ headline, summary, encouragement }` in the circle's language | Template sentence built from the numbers |
-| Visit brief | Medications, adherence, appointment | `{ overview, concerns[], questions[] }` | Table of medications and adherence only |
+| Feature           | Input                               | Output                                                                     | Fallback                                 |
+| ----------------- | ----------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------- |
+| Prescription scan | Image, at most 1 MB after downscale | `medications[]: { name, dose, form, times[], withFood, confidence }`       | Manual entry form with a note            |
+| Safety check      | Medication list                     | `cautions[]: { severity, medsInvolved[], explanation, questionForDoctor }` | Rule-based duplicate and timing checks   |
+| Weekly digest     | Statistics computed by code         | `{ headline, summary, encouragement }` in the circle's language            | Template sentence built from the numbers |
+| Visit brief       | Medications, adherence, appointment | `{ overview, concerns[], questions[] }`                                    | Table of medications and adherence only  |
 
 ### Prompt structure
 
 Each prompt has four parts, kept in `server/adapters/gemini/prompts.ts`:
+
 - **System instruction:** role, limits (no diagnosis, no dosing changes), tone (plain, kind, short), language.
 - **Task:** what to produce.
 - **Data:** fenced, labelled untrusted.
@@ -72,10 +73,10 @@ Each prompt has four parts, kept in `server/adapters/gemini/prompts.ts`:
 
 ### Why GenAI here
 
-| Step | Why a model, not rules |
-|---|---|
-| Reading a prescription | Handwriting, abbreviations and layouts vary without limit |
-| Interaction review | Needs broad pharmacological knowledge across arbitrary combinations |
-| Digest and brief | Turning numbers into language a worried family member reads easily, in two languages |
+| Step                   | Why a model, not rules                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| Reading a prescription | Handwriting, abbreviations and layouts vary without limit                            |
+| Interaction review     | Needs broad pharmacological knowledge across arbitrary combinations                  |
+| Digest and brief       | Turning numbers into language a worried family member reads easily, in two languages |
 
 Scheduling, adherence, escalation and stock are arithmetic and stay in code.

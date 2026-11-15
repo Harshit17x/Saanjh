@@ -1,5 +1,5 @@
 import type { AdherenceSummary } from './adherence';
-import type { Activity, Appointment, Circle, Dose, Medication, PublicMember } from './types';
+import type { Activity, Appointment, CheckIn, Circle, Dose, Medication, PublicMember } from './types';
 
 /** Response shapes of the HTTP API, shared so the client and server agree. */
 
@@ -27,6 +27,14 @@ export interface TodayResponse {
   nextAppointment: Appointment | null;
   proposals: Medication[];
   lowStock: { medId: string; medName: string; daysLeft: number }[];
+  /** Today's latest wellbeing check-in by the elder, if any. */
+  checkIn: CheckIn | null;
+  /** The most recent call for help in the last 24 hours, if any. */
+  helpRequest: { byName: string; at: number } | null;
+}
+
+export interface HelpResponse {
+  notified: number;
 }
 
 export interface DemoResponse extends SessionResponse {

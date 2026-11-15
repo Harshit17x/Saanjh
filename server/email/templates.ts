@@ -125,3 +125,21 @@ export function testEmail(to: string, name: string, appUrl: string): Email {
     text: `${title}\n\n${appUrl}`,
   };
 }
+
+/** Sent at once to family and caretakers when someone in the circle asks for help. */
+export function helpEmail(to: string, circle: Circle, byName: string, note: string, appUrl: string): Email {
+  const title = `${byName} has asked for help`;
+  const noteHtml = note ? `<p>Message: <strong>${escapeHtml(note)}</strong></p>` : '';
+  const body = `<p><strong>${escapeHtml(byName)}</strong> pressed “I need help” in ${escapeHtml(circle.elderName)}’s care circle.</p>${noteHtml}<p>Please call or check in as soon as you can.</p><p>${button('Open Saanjh', `${appUrl}/today`, true)}</p>`;
+  const text = `${title}\n\n${byName} pressed "I need help" in ${circle.elderName}'s care circle.${note ? `\nMessage: ${note}` : ''}\n\nPlease call or check in as soon as you can.\n${appUrl}/today`;
+  return { to, subject: `Urgent: ${title}`, html: layout(title, body, settingsFooter(appUrl)), text };
+}
+
+/** Sent to family and caretakers when the elder's daily check-in says they feel low or unwell. */
+export function moodEmail(to: string, circle: Circle, mood: string, note: string, appUrl: string): Email {
+  const title = `${circle.elderName} is feeling ${mood} today`;
+  const noteHtml = note ? `<p>They wrote: <em>${escapeHtml(note)}</em></p>` : '';
+  const body = `<p>In today’s check-in, ${escapeHtml(circle.elderName)} said they are feeling <strong>${escapeHtml(mood)}</strong>.</p>${noteHtml}<p>A call or a visit may help.</p><p>${button('Open Saanjh', `${appUrl}/today`, true)}</p>`;
+  const text = `${title}\n\n${note ? `They wrote: ${note}\n\n` : ''}A call or a visit may help.\n${appUrl}/today`;
+  return { to, subject: title, html: layout(title, body, settingsFooter(appUrl)), text };
+}

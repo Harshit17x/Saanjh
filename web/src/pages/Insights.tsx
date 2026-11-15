@@ -1,7 +1,13 @@
-import { Flame, Sparkles } from 'lucide-react';
+import { CalendarDays, Flame, Moon, Sparkles, Sun, Sunrise, Sunset, type LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import type { AdherenceResponse, DigestResponse } from '../../../shared/api';
-import { LOW_ADHERENCE_RATE, percent, type DayTally } from '../../../shared/adherence';
+import {
+  LOW_ADHERENCE_RATE,
+  percent,
+  type DayPeriod,
+  type DayTally,
+  type PeriodTally,
+} from '../../../shared/adherence';
 import { api } from '../api/client';
 import { AiNote, LoadState, PageHeading } from '../components/ui';
 import { useResource } from '../hooks/useResource';
@@ -106,10 +112,85 @@ function Digest() {
   );
 }
 
+const PERIOD_ICON: Record<DayPeriod, LucideIcon> = {
+  morning: Sunrise,
+  afternoon: Sun,
+  evening: Sunset,
+  night: Moon,
+};
+
+/** Adherence by part of the day, naming the weakest period so the family knows when to help. */
+function TimeOfDay({ periods }: { periods: PeriodTally[] }) {
+  const { t } = useI18n();
+  const decided = periods.filter((p) => p.rate !== null);
+  const weakest = [...decided].sort((a, b) => (a.rate ?? 1) - (b.rate ?? 1))[0];
+  const flagged = weakest && weakest.rate !== null && weakest.rate < LOW_ADHERENCE_RATE ? weakest : null;
+  return (
+    <section className="card stack" aria-labelledby="period-title">
+      <div className="card-head">
+        <h2 id="period-title">{t('insights.byPeriod')}</h2>
+        <Sun aria-hidden="true" />
+      </div>
+      <p className="muted">{t('insights.periodHint')}</p>
+      <ul className="periods list">
+        {periods.map((p) => {
+          const Icon = PERIOD_ICON[p.period];
+          const pct = percent(p.rate);
+          return (
+            <li key={p.period} className="period" data-low={p === flagged}>
+              <span className="period-icon" aria-hidden="true">
+                <Icon />
+              </span>
+              <span className="period-name">{t(`period.${p.period}`)}</span>
+              <span className="meter" data-low={p === flagged} aria-hidden="true">
+                <span style={{ width: `${pct ?? 0}%` }} />
+              </span>
+              <span className="period-pct">{pct === null ? '–' : `${pct}%`}</span>
+            </li>
+          );
+        })}
+      </ul>
+      {decided.length > 0 && (
+        <p className={flagged ? 'notice' : 'notice notice-ok'}>
+          {flagged ? t('insights.weakest', { period: t(`period.${flagged.period}`) }) : t('insights.allGood')}
+        </p>
+      )}
+    </section>
+  );
+}
+
+/** A 30-day calendar: one square per day, shaded by the share of doses taken. */
+function CalendarHeatmap({ days }: { days: DayTally[] }) {
+  const { t, locale } = useI18n();
+  const level = (rate: number | null): number =>
+    rate === null ? 0 : rate >= 0.99 ? 4 : rate >= 0.75 ? 3 : rate >= 0.5 ? 2 : 1;
+  return (
+    <section className="card stack" aria-labelledby="calendar-title">
+      <div className="card-head">
+        <h2 id="calendar-title">{t('insights.calendar')}</h2>
+        <CalendarDays aria-hidden="true" />
+      </div>
+      <p className="muted small">{t('insights.calendarHint')}</p>
+      <ol className="heatmap list">
+        {days.map((day) => {
+          const pct = percent(day.rate);
+          const label = `${formatShortDate(day.date, locale)}: ${pct === null ? t('insights.noDoses') : `${pct}%`}`;
+          return (
+            <li key={day.date} className="heat" data-level={level(day.rate)} title={label}>
+              <span className="visually-hidden">{label}</span>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
 export function Insights() {
   const { t, locale } = useI18n();
   const [days, setDays] = useState<7 | 30>(7);
   const summary = useResource(() => api.get<AdherenceResponse>(`/adherence?days=${days}`), String(days));
+  const month = useResource(() => api.get<AdherenceResponse>('/adherence?days=30'), 'month');
   const data = summary.data;
   const decided = data ? data.overall.taken + data.overall.missed + data.overall.skipped : 0;
 
@@ -226,6 +307,8 @@ export function Insights() {
 
           <div className="stack-l">
             <Digest />
+            <TimeOfDay periods={data.byPeriod} />
+            {month.data && <CalendarHeatmap days={month.data.byDay} />}
             <section className="card stack" aria-labelledby="meds-title">
               <h2 id="meds-title">{t('insights.byMed')}</h2>
               {data.byMedication.length === 0 ? (

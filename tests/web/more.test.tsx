@@ -32,7 +32,7 @@ describe('Insights', () => {
     expect(screen.getByText('Day streak')).toBeInTheDocument();
     expect(screen.getByRole('rowheader', { name: 'Metformin' })).toBeInTheDocument();
     expect(screen.getByText('75%')).toBeInTheDocument();
-    expect(screen.getByText('–')).toBeInTheDocument();
+    expect(screen.getAllByText('–').length).toBeGreaterThan(0);
     expect(await screen.findByText('93% of doses taken this week')).toBeInTheDocument();
     expect(screen.getByText('Written with Gemini')).toBeInTheDocument();
     await userEvent.click(screen.getByText('Show as a table'));
@@ -46,7 +46,8 @@ describe('Insights', () => {
     await screen.findByRole('img', { name: /Doses taken/ });
     const range = screen.getByRole('group', { name: 'Period' });
     await userEvent.click(within(range).getByRole('button', { name: '30 days' }));
-    await waitFor(() => expect(fetchMock.callsTo('GET', '/adherence?days=30')).toHaveLength(1));
+    // One request for the 30-day calendar on load, a second for the switched range.
+    await waitFor(() => expect(fetchMock.callsTo('GET', '/adherence?days=30')).toHaveLength(2));
     expect(within(range).getByRole('button', { name: '30 days' })).toHaveAttribute('aria-pressed', 'true');
     await userEvent.click(within(range).getByRole('button', { name: '7 days' }));
     await waitFor(() => expect(fetchMock.callsTo('GET', '/adherence?days=7').length).toBeGreaterThan(1));

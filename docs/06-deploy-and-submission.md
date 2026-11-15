@@ -6,13 +6,13 @@ Docker is not needed locally: Cloud Build builds the image from source.
 
 ## Needed from the owner
 
-| Item | How |
-|---|---|
-| Billing enabled on the project | Check in the Cloud console |
-| Gemini API key | Google AI Studio → Get API key |
-| Gmail app password | Google account → Security → 2-Step Verification → App passwords |
-| LinkedIn post | Published from the owner's account |
-| Platform submissions | Made by the owner on Hack2Skill |
+| Item                           | How                                                             |
+| ------------------------------ | --------------------------------------------------------------- |
+| Billing enabled on the project | Check in the Cloud console                                      |
+| Gemini API key                 | Google AI Studio → Get API key                                  |
+| Gmail app password             | Google account → Security → 2-Step Verification → App passwords |
+| LinkedIn post                  | Published from the owner's account                              |
+| Platform submissions           | Made by the owner on Hack2Skill                                 |
 
 ## Runbook
 
@@ -34,17 +34,17 @@ Deploy a walking skeleton by about 1:00 pm so the link works from then on.
 
 ## Configuration
 
-| Variable | Purpose |
-|---|---|
-| `GEMINI_API_KEY` | Gemini access |
-| `GEMINI_MODEL` | Model id (default in code) |
-| `GMAIL_USER`, `GMAIL_APP_PASSWORD` | Email sending |
-| `SESSION_SECRET`, `LINK_SECRET` | Signing sessions and email links |
-| `APP_URL` | Public URL used in emails |
-| `SCHEDULER_SA` | Service account allowed to call the internal endpoints |
-| `DATA_BACKEND` | `firestore` in production, `memory` locally |
-| `NODE_ENV` | `production` on Cloud Run (enables Secure cookies, HSTS, required secrets) |
-| `GOOGLE_CLOUD_PROJECT` | Firestore project (set by Cloud Run) |
+| Variable                           | Purpose                                                                    |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `GEMINI_API_KEY`                   | Gemini access                                                              |
+| `GEMINI_MODEL`                     | Model id (default in code)                                                 |
+| `GMAIL_USER`, `GMAIL_APP_PASSWORD` | Email sending                                                              |
+| `SESSION_SECRET`, `LINK_SECRET`    | Signing sessions and email links                                           |
+| `APP_URL`                          | Public URL used in emails                                                  |
+| `SCHEDULER_SA`                     | Service account allowed to call the internal endpoints                     |
+| `DATA_BACKEND`                     | `firestore` in production, `memory` locally                                |
+| `NODE_ENV`                         | `production` on Cloud Run (enables Secure cookies, HSTS, required secrets) |
+| `GOOGLE_CLOUD_PROJECT`             | Firestore project (set by Cloud Run)                                       |
 
 ## Before each scored submission
 
@@ -75,6 +75,7 @@ Only two scored submissions are allowed and **the last one counts**. Make the se
 > **The problem:** elderly people juggle several medicines and appointments, and their families worry from a distance. Most apps either nag the elder or hand control to someone else.
 >
 > **What I built:** a shared Care Circle for an elder, their family and caretakers.
+>
 > - Passcode access for each member, with permissions set by the elder
 > - Medication schedules, adherence tracking and doctor appointments
 > - Email reminders with one-tap "I took it"

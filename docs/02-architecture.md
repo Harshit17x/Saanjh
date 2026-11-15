@@ -28,28 +28,28 @@ shared/  pure domain logic used by server and web: schedule maths,
 
 ## Stack
 
-| Area | Choice |
-|---|---|
-| Language | TypeScript, `strict` and `noUncheckedIndexedAccess` |
-| Web | React 19, Vite, React Router, plain CSS with design tokens |
-| Server | Node 22, Express 5, Zod, Helmet, `jose`, `nodemailer` |
-| Data | `@google-cloud/firestore` |
-| AI | `@google/genai` |
-| Tooling | Vitest, Testing Library, `vitest-axe`, Supertest, type-aware ESLint, Prettier, GitHub Actions, Dependabot |
+| Area     | Choice                                                                                                    |
+| -------- | --------------------------------------------------------------------------------------------------------- |
+| Language | TypeScript, `strict` and `noUncheckedIndexedAccess`                                                       |
+| Web      | React 19, Vite, React Router, plain CSS with design tokens                                                |
+| Server   | Node 22, Express 5, Zod, Helmet, `jose`, `nodemailer`                                                     |
+| Data     | `@google-cloud/firestore`                                                                                 |
+| AI       | `@google/genai`                                                                                           |
+| Tooling  | Vitest, Testing Library, `vitest-axe`, Supertest, type-aware ESLint, Prettier, GitHub Actions, Dependabot |
 
 ## Google services
 
-| Service | Use |
-|---|---|
-| Cloud Run | Hosts the container; health check; minimum 1 instance during judging |
-| Cloud Build | Builds the image from source on deploy |
-| Firestore (native mode) | All application data |
-| Gemini API | Prescription scan, safety check, weekly digest, visit brief |
-| Cloud Scheduler | Triggers the reminder tick every 5 minutes |
-| Secret Manager | Gemini key, Gmail app password, session and link-signing secrets |
-| Cloud Logging | Structured JSON logs with request ids |
-| Gmail SMTP | Sends reminder emails |
-| Google Calendar and Maps | Deep links from appointments |
+| Service                  | Use                                                                  |
+| ------------------------ | -------------------------------------------------------------------- |
+| Cloud Run                | Hosts the container; health check; minimum 1 instance during judging |
+| Cloud Build              | Builds the image from source on deploy                               |
+| Firestore (native mode)  | All application data                                                 |
+| Gemini API               | Prescription scan, safety check, weekly digest, visit brief          |
+| Cloud Scheduler          | Triggers the reminder tick every 5 minutes                           |
+| Secret Manager           | Gemini key, Gmail app password, session and link-signing secrets     |
+| Cloud Logging            | Structured JSON logs with request ids                                |
+| Gmail SMTP               | Sends reminder emails                                                |
+| Google Calendar and Maps | Deep links from appointments                                         |
 
 Gemini model: `gemini-3.1-flash-lite` by default with `gemini-flash-lite-latest` as fallback, both configurable.
 
@@ -102,6 +102,7 @@ cache/{key}                        safety-check results keyed by a hash of the m
 The medication, member and activity collections live under `circles/{id}`. Doses, appointments, claims and cache are top-level.
 
 Design notes:
+
 - **Doses are materialised** for today and tomorrow when a medication is created or edited, and topped up by the tick. Deterministic ids make this safe to repeat.
 - **`doses` and `appointments` are top-level** so the reminder run is a single range query on `dueAt` / `at` (automatic single-field indexes). The per-circle screens use two composite indexes, `(circleId, dueAt)` and `(circleId, at)`, defined in `firestore.indexes.json`.
 - **Time:** instants are stored in UTC. Schedules are stored as local wall-clock times plus the circle's timezone.
@@ -111,32 +112,34 @@ Design notes:
 
 All routes are under `/api`, exchange JSON, are validated with Zod, and need a session cookie unless marked public.
 
-| Method and path | Purpose |
-|---|---|
-| `POST /circles` (public) | Create a circle and its elder member |
-| `POST /auth/join` (public) | Join a circle with its code and a new passcode |
-| `POST /auth/login` (public) | Circle code, member and passcode → session |
-| `POST /auth/logout` · `GET /me` | Session |
-| `GET /circle` · `PATCH /circle` | Circle and settings (settings: elder only) |
-| `PATCH /circle/members/:id` · `DELETE /circle/members/:id` | Permissions and removal (elder only) |
-| `GET /medications` · `POST /medications` | List; add (a proposal when approval applies) |
-| `PATCH /medications/:id` · `DELETE /medications/:id` | Edit, pause, delete |
-| `POST /medications/:id/approve` · `POST /medications/:id/reject` | Elder decision on a proposal |
-| `GET /today` | Today's doses and next appointment |
-| `POST /doses/:id/take` · `POST /doses/:id/skip` · `POST /doses/:id/undo` | Dose actions |
-| `GET /adherence?days=7|30` | Computed statistics |
-| `GET /appointments` · `POST` · `PATCH /:id` · `DELETE /:id` | Appointments |
-| `GET /activity` | Audit trail |
-| `POST /ai/scan-prescription` | Image → draft medications |
-| `POST /ai/safety-check` | Current list → cautions |
-| `GET /ai/visit-brief/:apptId` | Doctor-visit brief |
-| `GET /act/:token` (public, signed) | One-tap take or skip from an email |
-| `POST /internal/tick` (Scheduler only) | Run the reminder engine |
-| `POST /internal/digest` (Scheduler only) | Email the weekly note to every circle |
-| `POST /demo` (public) | Create a populated demo circle and sign in as its elder |
-| `POST /demo/switch/:id` | In a demo circle only, view as another member |
-| `POST /me/test-email` | Send the signed-in member a test reminder |
-| `GET /healthz` (public) | Health check |
+| Method and path                                                          | Purpose                                                                           |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| `POST /circles` (public)                                                 | Create a circle and its elder member                                              |
+| `POST /auth/join` (public)                                               | Join a circle with its code and a new passcode                                    |
+| `POST /auth/login` (public)                                              | Circle code, member and passcode → session                                        |
+| `POST /auth/logout` · `GET /me`                                          | Session                                                                           |
+| `GET /circle` · `PATCH /circle`                                          | Circle and settings (settings: elder only)                                        |
+| `PATCH /circle/members/:id` · `DELETE /circle/members/:id`               | Permissions and removal (elder only)                                              |
+| `GET /medications` · `POST /medications`                                 | List; add (a proposal when approval applies)                                      |
+| `PATCH /medications/:id` · `DELETE /medications/:id`                     | Edit, pause, delete                                                               |
+| `POST /medications/:id/approve` · `POST /medications/:id/reject`         | Elder decision on a proposal                                                      |
+| `GET /today`                                                             | Today's doses and next appointment                                                |
+| `POST /doses/:id/take` · `POST /doses/:id/skip` · `POST /doses/:id/undo` | Dose actions                                                                      |
+| `GET /adherence?days=7                                                   | 30`                                                                               | Computed statistics |
+| `GET /appointments` · `POST` · `PATCH /:id` · `DELETE /:id`              | Appointments                                                                      |
+| `GET /activity`                                                          | Audit trail                                                                       |
+| `POST /ai/scan-prescription`                                             | Image → draft medications                                                         |
+| `POST /ai/safety-check`                                                  | Current list → cautions                                                           |
+| `GET /ai/visit-brief/:apptId`                                            | Doctor-visit brief                                                                |
+| `GET /act/:token` (public, signed)                                       | One-tap take or skip from an email                                                |
+| `POST /internal/tick` (Scheduler only)                                   | Run the reminder engine                                                           |
+| `POST /internal/digest` (Scheduler only)                                 | Email the weekly note to every circle                                             |
+| `POST /demo` (public)                                                    | Create a populated demo circle and sign in as its elder                           |
+| `POST /demo/switch/:id`                                                  | In a demo circle only, view as another member                                     |
+| `POST /me/test-email`                                                    | Send the signed-in member a test reminder                                         |
+| `POST /help`                                                             | "I need help": email family and caretakers now (elder or caretaker; 3 per 10 min) |
+| `POST /checkin`                                                          | The elder's daily wellbeing check-in; _low_ or _unwell_ emails family once a day  |
+| `GET /healthz` (public)                                                  | Health check                                                                      |
 
 Errors use one shape: `{ error: { code, message, requestId } }`.
 

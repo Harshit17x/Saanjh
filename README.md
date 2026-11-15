@@ -2,10 +2,10 @@
 
 **Shared care for the golden hours.**
 
-Saanjh means *dusk* in Hindi, the golden hours of life. It also echoes *saanjha*, "shared". Saanjh is a care platform where an elderly person, their family and their caretakers share one healthcare profile: medications, adherence and doctor appointments. **The elder stays in charge.**
+Saanjh means _dusk_ in Hindi, the golden hours of life. It also echoes _saanjha_, "shared". Saanjh is a care platform where an elderly person, their family and their caretakers share one healthcare profile: medications, adherence and doctor appointments. **The elder stays in charge.**
 
 > Built solo for **PromptWars × Catalyst** (Google for Developers · Hack2Skill · MnM), 15 November 2026.
-> Challenge: *Elderly Care & Medication Management Platform*.
+> Challenge: _Elderly Care & Medication Management Platform_.
 
 **Try it:** open the deployed app and press **Try a demo circle**. You will be signed in as Kamla Devi, the elder, with two weeks of history. Use the banner at the top to see the same circle as Priya (family) or Ravi (caretaker).
 
@@ -13,27 +13,32 @@ Saanjh means *dusk* in Hindi, the golden hours of life. It also echoes *saanjha*
 
 ## How Saanjh answers the problem statement
 
-| The challenge asks for | Saanjh |
-|---|---|
-| Shared ecosystem for elder, caretakers and family | A **Care Circle** per elder. Members join with the circle code and choose a role. |
-| Secure, passcode-based access | Each member has their **own 6-digit passcode**, hashed with scrypt, locked after 5 wrong tries. Sessions use HttpOnly, SameSite=Strict cookies. |
-| View, add, edit, manage medication schedules | Times of day, days of week, start and end dates, with-food notes, stock count. Pause, restart, stop. |
-| Track adherence | Every dose is taken, skipped or missed. 7- and 30-day adherence overall and per medicine, day streaks, a chart with a table alternative. |
-| Monitor upcoming doctor appointments | Appointments with **Add to Google Calendar** and **Google Maps** links, plus reminders 24 h and 2 h ahead. |
+| The challenge asks for                                                     | Saanjh                                                                                                                                                                                               |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Shared ecosystem for elder, caretakers and family                          | A **Care Circle** per elder. Members join with the circle code and choose a role.                                                                                                                    |
+| Secure, passcode-based access                                              | Each member has their **own 6-digit passcode**, hashed with scrypt, locked after 5 wrong tries. Sessions use HttpOnly, SameSite=Strict cookies.                                                      |
+| View, add, edit, manage medication schedules                               | Times of day, days of week, start and end dates, with-food notes, stock count. Pause, restart, stop.                                                                                                 |
+| Track adherence                                                            | Every dose is taken, skipped or missed. 7- and 30-day adherence overall and per medicine, day streaks, a chart with a table alternative.                                                             |
+| Monitor upcoming doctor appointments                                       | Appointments with **Add to Google Calendar** and **Google Maps** links, plus reminders 24 h and 2 h ahead.                                                                                           |
+| Healthcare routines                                                        | A daily wellbeing check-in and an "I need help" alert that reaches the whole circle at once.                                                                                                         |
 | Proactive email reminders for missed meds, upcoming doses and appointments | Cloud Scheduler runs the reminder engine every 5 minutes. **Upcoming** goes to the elder, a **nudge** follows 20 minutes after the dose, and **missed** goes to family and caretakers at 60 minutes. |
-| Beyond a basic reminder app | See below. |
-| Elder at the centre of their own decisions | Changes by others are **proposals the elder approves**. The elder sets each member's access. Family is told only when a dose stays unconfirmed. |
+| Beyond a basic reminder app                                                | See below.                                                                                                                                                                                           |
+| Elder at the centre of their own decisions                                 | Changes by others are **proposals the elder approves**. The elder sets each member's access. Family is told only when a dose stays unconfirmed.                                                      |
 
 ## What makes it different
 
 - **The elder approves changes.** When family or a caretaker adds, edits, pauses or stops a medicine, it waits on the elder's Today screen until they approve or decline it.
 - **One tap from the email.** Reminder emails carry signed, single-use **I took it** and **Skip** links. The elder needs no password and no app.
 - **Escalation with dignity.** The elder is reminded first. Family hears only if a dose is still unconfirmed an hour later.
-- **Prescription scan (Gemini vision).** Photograph a prescription and Gemini drafts the medicines, reading shorthand like *BD*, *TDS* and *1-0-1*, for a person to check before saving.
+- **Prescription scan (Gemini vision).** Photograph a prescription and Gemini drafts the medicines, reading shorthand like _BD_, _TDS_ and _1-0-1_, for a person to check before saving.
 - **Safety check (Gemini).** Gemini reviews the whole list for possible interactions, duplicates and timing issues. It phrases each one as a question to ask the doctor, never a diagnosis.
 - **Weekly note and visit brief (Gemini).** Gemini writes a short, kind weekly summary in English or Hindi, and a printable one-page brief before each appointment. **Every number comes from tested code. The model only writes the words.**
+- **"I need help", hold to confirm.** The elder or a caretaker holds a big red button for two seconds (touch, mouse or keyboard) and every family member and caretaker is emailed at once. A banner shows the alert to the whole circle for 24 hours. Holding prevents accidental alarms.
+- **Daily wellbeing check-in.** The elder taps how they feel (great, good, okay, low, unwell) and can add a note. Family see it on their Today screen. A _low_ or _unwell_ answer emails them the same day, once.
+- **When doses slip.** Insights shows adherence by time of day (morning, afternoon, evening, night), names the weakest period, and adds a 30-day calendar heatmap.
 - **Refill warnings.** Stock counts down with each dose taken, and a warning appears when less than 5 days remain.
 - **Designed for older eyes.** Atkinson Hyperlegible type at an 18 px base, three text sizes, high contrast in light and dark, 56 px touch targets, an on-screen passcode keypad, Hindi, and **Read my day** aloud.
+- **Light and dark, your choice.** A one-tap theme switch, remembered on the device and applied before first paint, so there is no flash.
 - **The sky arc.** The Today screen draws the day as the sun's path from dawn to dusk, with each dose on it. The sky's colour follows the real time of day.
 
 ## Architecture
@@ -64,17 +69,17 @@ More detail is in [`docs/`](docs/00-overview.md).
 
 ## Google services used
 
-| Service | Role |
-|---|---|
-| **Cloud Run** | Hosts the single container: health check, graceful shutdown, non-root user |
-| **Cloud Build** | Builds the image from source on deploy |
-| **Firestore** | All application data, with composite indexes in `firestore.indexes.json` |
+| Service                          | Role                                                                                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cloud Run**                    | Hosts the single container: health check, graceful shutdown, non-root user                                                                               |
+| **Cloud Build**                  | Builds the image from source on deploy                                                                                                                   |
+| **Firestore**                    | All application data, with composite indexes in `firestore.indexes.json`                                                                                 |
 | **Gemini API** (`@google/genai`) | Prescription scan (vision), safety check, weekly note, visit brief. Structured JSON output with schemas, low thinking, a 12 s timeout and model fallback |
-| **Cloud Scheduler** | Calls the reminder engine every 5 minutes and the digest weekly, authenticated with OIDC |
-| **Secret Manager** | Every secret, mounted as environment variables |
-| **Cloud Logging** | Structured JSON logs with severity and request ids |
-| **Gmail** | Sends reminder emails over SMTP with an app password |
-| **Google Calendar and Maps** | Deep links from every appointment |
+| **Cloud Scheduler**              | Calls the reminder engine every 5 minutes and the digest weekly, authenticated with OIDC                                                                 |
+| **Secret Manager**               | Every secret, mounted as environment variables                                                                                                           |
+| **Cloud Logging**                | Structured JSON logs with severity and request ids                                                                                                       |
+| **Gmail**                        | Sends reminder emails over SMTP with an app password                                                                                                     |
+| **Google Calendar and Maps**     | Deep links from every appointment                                                                                                                        |
 
 ## Security
 
@@ -112,12 +117,12 @@ npm run dev
 
 Open http://localhost:5173 and press **Try a demo circle**. Without a Gemini key the AI features use their rule-based fallbacks. Without Gmail credentials, emails are logged instead of sent.
 
-| Command | What it does |
-|---|---|
-| `npm run check` | Lint, type-check, tests with coverage floors, and build: the same as CI |
-| `npm test` | Run the tests |
-| `npm run build && npm start` | Production build served on port 8080 |
-| `npm run smoke -- <url>` | End-to-end smoke test against a running server |
+| Command                      | What it does                                                            |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `npm run check`              | Lint, type-check, tests with coverage floors, and build: the same as CI |
+| `npm test`                   | Run the tests                                                           |
+| `npm run build && npm start` | Production build served on port 8080                                    |
+| `npm run smoke -- <url>`     | End-to-end smoke test against a running server                          |
 
 ## Testing
 

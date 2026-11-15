@@ -23,12 +23,31 @@ export interface MedicationTally extends Tally {
   medName: string;
 }
 
+/** Parts of the day, by a dose's local time: morning 05–12, afternoon 12–17, evening 17–21, night 21–05. */
+export const DAY_PERIODS = ['morning', 'afternoon', 'evening', 'night'] as const;
+export type DayPeriod = (typeof DAY_PERIODS)[number];
+
+export interface PeriodTally extends Tally {
+  period: DayPeriod;
+}
+
+/** The part of the day a local `HH:MM` time falls in. */
+export function periodOf(time: string): DayPeriod {
+  const hour = Number(time.slice(0, 2));
+  if (hour >= 5 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 17) return 'afternoon';
+  if (hour >= 17 && hour < 21) return 'evening';
+  return 'night';
+}
+
 export interface AdherenceSummary {
   from: string;
   to: string;
   overall: Tally;
   byDay: DayTally[];
   byMedication: MedicationTally[];
+  /** Adherence by part of the day, to show when doses tend to be missed. */
+  byPeriod: PeriodTally[];
   /** Consecutive days, ending today, on which every decided dose was taken. */
   streakDays: number;
 }
@@ -68,6 +87,9 @@ export function summarise(doses: Dose[], from: string, to: string, now: number):
     dateRange(from, to).map((date) => [date, { date, ...emptyTally() }]),
   );
   const meds = new Map<string, MedicationTally>();
+  const periods = new Map<DayPeriod, PeriodTally>(
+    DAY_PERIODS.map((period) => [period, { period, ...emptyTally() }]),
+  );
 
   for (const dose of doses) {
     const day = days.get(dose.localDate);
@@ -75,6 +97,8 @@ export function summarise(doses: Dose[], from: string, to: string, now: number):
     const status = effectiveStatus(dose, now);
     add(overall, status);
     add(day, status);
+    const period = periods.get(periodOf(dose.localTime));
+    if (period) add(period, status);
     let med = meds.get(dose.medId);
     if (!med) {
       med = { medId: dose.medId, medName: dose.medName, ...emptyTally() };
@@ -90,6 +114,7 @@ export function summarise(doses: Dose[], from: string, to: string, now: number):
     overall: finalise(overall),
     byDay,
     byMedication: [...meds.values()].map(finalise).sort((a, b) => a.medName.localeCompare(b.medName)),
+    byPeriod: [...periods.values()].map(finalise),
     streakDays: streak(byDay),
   };
 }
