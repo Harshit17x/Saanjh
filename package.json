@@ -38,7 +38,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource/atkinson-hyperlegible": "^5.3.0",
     "@fontsource/noto-sans-devanagari": "^5.3.0",
@@ -54,15 +54,15 @@
     "@types/react-dom": "^19.3.0",
     "@types/supertest": "^7.2.1",
     "@vitejs/plugin-react": "^6.3.0",
-    "@vitest/coverage-v8": "^4.1.12",
+    "@vitest/coverage-v8": "^5.1.0",
     "axe-core": "^4.14.0",
     "concurrently": "^10.0.7",
     "esbuild": "^0.28.2",
-    "eslint": "^9.39.5",
+    "eslint": "^10.14.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",
-    "jsdom": "^29.1.1",
+    "jsdom": "^31.0.0",
     "lucide-react": "^1.73.0",
     "prettier": "^3.10.1",
     "react": "^19.3.1",
@@ -70,10 +70,10 @@
     "react-router": "^8.5.1",
     "supertest": "^7.3.2",
     "tsx": "^4.23.15",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.72.2",
     "vite": "^8.3.8",
-    "vitest": "^4.1.12"
+    "vitest": "^5.1.0"
   },
   "overrides": {
     "@typescript-eslint/typescript-estree": {
