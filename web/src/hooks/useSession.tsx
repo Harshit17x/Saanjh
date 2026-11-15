@@ -77,5 +77,8 @@ export function useActiveSession(): SessionResponse {
 export const isElder = (member: Pick<Member, 'role'>): boolean => member.role === 'elder';
 export const canManage = (member: Pick<Member, 'role' | 'permission'>): boolean =>
   isElder(member) || member.permission === 'manage';
+/** The elder and caretakers can raise a help alert; family receive it. */
+export const canCallForHelp = (member: Pick<Member, 'role'>): boolean =>
+  isElder(member) || member.role === 'caretaker';
 export const canRecordDoses = (member: Pick<Member, 'role' | 'permission'>): boolean =>
   isElder(member) || (member.role === 'caretaker' && member.permission === 'manage');

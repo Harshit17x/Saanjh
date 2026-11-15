@@ -1,7 +1,8 @@
 import { CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
 import type { ActPreviewResponse } from '../../../shared/api';
-import { api, messageOf } from '../api/client';
+import { api } from '../api/client';
+import { useAction } from '../hooks/useAction';
 import { LogoMark } from '../components/Logo';
 import { FormError, LoadState, PageHeading } from '../components/ui';
 import { useResource } from '../hooks/useResource';
@@ -24,22 +25,14 @@ export function Act() {
     token,
   );
   const [done, setDone] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, busy, run } = useAction();
   const data = preview.data;
 
-  const confirm = async () => {
-    setBusy(true);
-    setError(null);
-    try {
+  const confirm = () =>
+    void run(async () => {
       await api.post('/act', { token });
       setDone(true);
-    } catch (err) {
-      setError(messageOf(err));
-    } finally {
-      setBusy(false);
-    }
-  };
+    });
 
   return (
     <main id="main" className="page page-narrow">
@@ -77,7 +70,7 @@ export function Act() {
                 <button
                   type="button"
                   className={`btn btn-large btn-block ${data.action === 'take' ? 'btn-ok' : 'btn-primary'}`}
-                  onClick={() => void confirm()}
+                  onClick={confirm}
                   disabled={busy}
                 >
                   {data.action === 'take' ? t('act.confirmTake') : t('act.confirmSkip')}

@@ -2,7 +2,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { pickNextDose } from '../../web/src/pages/Today';
+import { pickNextDose } from '../../web/src/lib/today';
 import {
   caretaker,
   elder,

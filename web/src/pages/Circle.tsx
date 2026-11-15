@@ -2,9 +2,10 @@ import { Copy, LogOut, Mail, UserMinus } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import type { ActivityResponse, CircleResponse, SessionResponse } from '../../../shared/api';
-import type { Language, Permission } from '../../../shared/types';
-import { api, ApiError, messageOf } from '../api/client';
+import type { Permission } from '../../../shared/types';
+import { api } from '../api/client';
 import { Avatar, FormError, LoadState, PageHeading, SelectField, TextField } from '../components/ui';
+import { useAction } from '../hooks/useAction';
 import { usePreferences } from '../hooks/usePreferences';
 import { useResource } from '../hooks/useResource';
 import { isElder, useActiveSession, useSession } from '../hooks/useSession';
@@ -18,42 +19,28 @@ function Profile() {
   const { setSession } = useSession();
   const { announce } = usePreferences();
   const [form, setForm] = useState({ name: member.name, email: member.email ?? '', notify: member.notify });
-  const [fields, setFields] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { error, fields, busy, run } = useAction();
 
-  const save = async (event: FormEvent) => {
+  const save = (event: FormEvent) => {
     event.preventDefault();
-    setBusy(true);
-    setError(null);
-    setFields({});
-    try {
+    void run(async () => {
       const next = await api.patch<SessionResponse>('/me', form);
       setSession({ ...next, circle });
       announce(t('meds.saved'));
-    } catch (err) {
-      if (err instanceof ApiError) setFields(err.fields);
-      setError(messageOf(err));
-    } finally {
-      setBusy(false);
-    }
+    });
   };
 
-  const sendTest = async () => {
-    setError(null);
-    try {
+  const sendTest = () =>
+    void run(async () => {
       await api.post('/me/test-email');
       announce(t('circle.testSent'));
       window.alert(t('circle.testSent'));
-    } catch (err) {
-      setError(messageOf(err));
-    }
-  };
+    });
 
   return (
     <section className="card stack" aria-labelledby="profile-title">
       <h2 id="profile-title">{t('circle.profile')}</h2>
-      <form className="stack" onSubmit={(e) => void save(e)} noValidate>
+      <form className="stack" onSubmit={save} noValidate>
         <FormError message={error} />
         <TextField
           label={t('join.name')}
@@ -85,7 +72,7 @@ function Profile() {
           <button type="submit" className="btn btn-primary" disabled={busy}>
             {t('common.save')}
           </button>
-          <button type="button" className="btn" onClick={() => void sendTest()} disabled={!member.email}>
+          <button type="button" className="btn" onClick={sendTest} disabled={!member.email}>
             <Mail aria-hidden="true" />
             {t('circle.testEmail')}
           </button>
@@ -105,25 +92,22 @@ function Settings({ onSaved }: { onSaved: () => void }) {
     language: circle.language,
     requireElderApproval: circle.requireElderApproval,
   });
-  const [error, setError] = useState<string | null>(null);
+  const { error, run } = useAction();
 
-  const save = async (event: FormEvent) => {
+  const save = (event: FormEvent) => {
     event.preventDefault();
-    setError(null);
-    try {
+    void run(async () => {
       const { circle: next } = await api.patch<{ circle: SessionResponse['circle'] }>('/circle', form);
       setSession({ circle: next, member });
       announce(t('meds.saved'));
       onSaved();
-    } catch (err) {
-      setError(messageOf(err));
-    }
+    });
   };
 
   return (
     <section className="card stack" aria-labelledby="settings-title">
       <h2 id="settings-title">{t('circle.settings')}</h2>
-      <form className="stack" onSubmit={(e) => void save(e)} noValidate>
+      <form className="stack" onSubmit={save} noValidate>
         <FormError message={error} />
         <TextField
           label={t('start.elderName')}
@@ -135,7 +119,7 @@ function Settings({ onSaved }: { onSaved: () => void }) {
         <SelectField
           label={t('start.language')}
           value={form.language}
-          onChange={(e) => setForm({ ...form, language: e.target.value as Language })}
+          onChange={(e) => setForm({ ...form, language: e.target.value === 'hi' ? 'hi' : 'en' })}
         >
           <option value="en">English</option>
           <option value="hi" lang="hi">
@@ -173,7 +157,7 @@ export function Circle() {
   const [params] = useSearchParams();
   const data = useResource(() => api.get<CircleResponse>('/circle'), member.id);
   const activity = useResource(() => api.get<ActivityResponse>('/activity'), member.id);
-  const [error, setError] = useState<string | null>(null);
+  const { error, run } = useAction();
   const elder = isElder(member);
 
   const copyInvite = async () => {
@@ -191,25 +175,18 @@ export function Circle() {
     }
   };
 
-  const setAccess = async (id: string, permission: Permission) => {
-    setError(null);
-    try {
-      await api.patch(`/circle/members/${id}`, { permission });
+  const updateMembers = (request: () => Promise<unknown>) =>
+    void run(async () => {
+      await request();
       await Promise.all([data.reload(), activity.reload()]);
-    } catch (err) {
-      setError(messageOf(err));
-    }
-  };
+    });
 
-  const remove = async (id: string, name: string) => {
+  const setAccess = (id: string, permission: Permission) =>
+    updateMembers(() => api.patch(`/circle/members/${id}`, { permission }));
+
+  const remove = (id: string, name: string) => {
     if (!window.confirm(t('circle.confirmRemove', { name }))) return;
-    setError(null);
-    try {
-      await api.delete(`/circle/members/${id}`);
-      await Promise.all([data.reload(), activity.reload()]);
-    } catch (err) {
-      setError(messageOf(err));
-    }
+    updateMembers(() => api.delete(`/circle/members/${id}`));
   };
 
   return (
@@ -274,7 +251,7 @@ export function Circle() {
                       <select
                         aria-label={t('circle.access', { name: m.name })}
                         value={m.permission}
-                        onChange={(e) => void setAccess(m.id, e.target.value as Permission)}
+                        onChange={(e) => setAccess(m.id, e.target.value === 'view' ? 'view' : 'manage')}
                       >
                         <option value="manage">{t('permission.manage')}</option>
                         <option value="view">{t('permission.view')}</option>
@@ -282,7 +259,7 @@ export function Circle() {
                       <button
                         type="button"
                         className="btn btn-danger"
-                        onClick={() => void remove(m.id, m.name)}
+                        onClick={() => remove(m.id, m.name)}
                         aria-label={`${t('circle.remove')} ${m.name}`}
                       >
                         <UserMinus aria-hidden="true" />

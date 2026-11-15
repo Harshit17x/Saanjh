@@ -14,10 +14,10 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react';
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import type { DemoResponse } from '../../../shared/api';
-import { api, messageOf } from '../api/client';
+import { api } from '../api/client';
+import { useAction } from '../hooks/useAction';
 import { LanguageControl, ThemeToggle } from '../components/AppShell';
 import { LogoMark } from '../components/Logo';
 import { FormError, PageHeading } from '../components/ui';
@@ -207,24 +207,17 @@ export function Landing() {
   const { t } = useI18n();
   const { setSession } = useSession();
   const navigate = useNavigate();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, busy, run } = useAction();
 
-  const startDemo = async () => {
-    setBusy(true);
-    setError(null);
-    try {
+  const startDemo = () =>
+    void run(async () => {
       const demo = await api.post<DemoResponse>('/demo');
       setSession(demo, { code: demo.code, passcode: demo.passcode });
       void navigate('/today');
-    } catch (err) {
-      setError(messageOf(err));
-      setBusy(false);
-    }
-  };
+    });
 
   const demoButton = (className: string) => (
-    <button type="button" className={className} onClick={() => void startDemo()} disabled={busy}>
+    <button type="button" className={className} onClick={startDemo} disabled={busy}>
       <Sparkles aria-hidden="true" />
       {busy ? t('landing.demoBusy') : t('landing.demo')}
     </button>

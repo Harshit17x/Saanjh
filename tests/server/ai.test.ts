@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { fence } from '../../server/adapters/gemini/prompts';
-import { ruleBasedCautions, templateDigest } from '../../server/services/ai';
+import { ruleBasedCautions, templateDigest } from '../../server/services/aiFallback';
 import type { AdherenceSummary } from '../../shared/adherence';
 import type { Circle } from '../../shared/types';
 import { med } from '../shared/fixtures';

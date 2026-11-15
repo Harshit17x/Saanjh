@@ -1,10 +1,11 @@
 import { CalendarHeart, HeartHandshake, LineChart, LogOut, Moon, Pill, Sun } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 import type { CircleResponse, SessionResponse } from '../../../shared/api';
 import { DEMO_PASSCODE } from '../../../shared/demo';
 import type { Language } from '../../../shared/types';
-import { api, messageOf } from '../api/client';
+import { api } from '../api/client';
+import { useAction } from '../hooks/useAction';
 import { useI18n } from '../i18n';
 import type { MessageKey } from '../i18n/en';
 import { displayCode } from '../lib/format';
@@ -88,18 +89,14 @@ function DemoBanner({ session }: { session: SessionResponse }) {
   const { setSession } = useSession();
   const { announce } = usePreferences();
   const members = useResource(() => api.get<CircleResponse>('/circle'), session.circle.id);
-  const [error, setError] = useState<string | null>(null);
+  const { error, run } = useAction();
 
-  const switchTo = async (id: string) => {
-    try {
+  const switchTo = (id: string) =>
+    void run(async () => {
       const next = await api.post<SessionResponse>(`/demo/switch/${id}`);
       setSession(next);
       announce(`${t('demo.viewing')} ${next.member.name}`);
-      setError(null);
-    } catch (err) {
-      setError(messageOf(err));
-    }
-  };
+    });
 
   return (
     <div className="demo-banner">
@@ -115,7 +112,7 @@ function DemoBanner({ session }: { session: SessionResponse }) {
               key={m.id}
               type="button"
               aria-pressed={m.id === session.member.id}
-              onClick={() => void switchTo(m.id)}
+              onClick={() => switchTo(m.id)}
             >
               {m.name.split(' ')[0]}
               <span className="demo-role"> · {t(`role.${m.role}`)}</span>

@@ -1,7 +1,7 @@
 import { Plus, X } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { MED_FORMS, type MedForm, type MedicationFields } from '../../../shared/types';
-import { ApiError, messageOf } from '../api/client';
+import { useAction } from '../hooks/useAction';
 import { useI18n } from '../i18n';
 import { FormError, SelectField, TextAreaField, TextField } from './ui';
 
@@ -34,9 +34,7 @@ interface Props {
 export function MedicineForm({ initial, submitLabel, onSubmit, onCancel }: Props) {
   const { t } = useI18n();
   const [values, setValues] = useState<MedicationFields>(initial);
-  const [fields, setFields] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { error, fields, busy, run } = useAction();
   const set = <K extends keyof MedicationFields>(key: K, value: MedicationFields[K]) =>
     setValues((v) => ({ ...v, [key]: value }));
 
@@ -48,22 +46,13 @@ export function MedicineForm({ initial, submitLabel, onSubmit, onCancel }: Props
         : [...values.daysOfWeek, day].sort(),
     );
 
-  const submit = async (event: FormEvent) => {
+  const submit = (event: FormEvent) => {
     event.preventDefault();
-    setBusy(true);
-    setError(null);
-    setFields({});
-    try {
-      await onSubmit(values);
-    } catch (err) {
-      if (err instanceof ApiError) setFields(err.fields);
-      setError(messageOf(err));
-      setBusy(false);
-    }
+    void run(() => onSubmit(values));
   };
 
   return (
-    <form className="stack" onSubmit={(e) => void submit(e)} noValidate>
+    <form className="stack" onSubmit={submit} noValidate>
       <FormError message={error} />
       <TextField
         label={t('form.name')}

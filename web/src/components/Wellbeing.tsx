@@ -2,7 +2,8 @@ import { HeartPulse, Siren } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import type { HelpResponse } from '../../../shared/api';
 import { MOODS, type CheckIn, type Mood } from '../../../shared/types';
-import { api, messageOf } from '../api/client';
+import { api } from '../api/client';
+import { useAction } from '../hooks/useAction';
 import { usePreferences } from '../hooks/usePreferences';
 import { useI18n } from '../i18n';
 import { formatTime } from '../lib/format';
@@ -24,28 +25,25 @@ export function HelpButton({ onSent }: { onSent: () => void }) {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [holding, setHolding] = useState(false);
   const [result, setResult] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { error, run } = useAction();
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  const send = async () => {
+  const send = () => {
     setHolding(false);
-    try {
+    void run(async () => {
       const { notified } = await api.post<HelpResponse>('/help', {});
       const message = notified > 0 ? t('help.sent', { count: notified }) : t('help.sentNone');
       setResult(message);
       announce(message);
       onSent();
-    } catch (err) {
-      setError(messageOf(err));
-    }
+    });
   };
 
   const start = () => {
     if (holding) return;
-    setError(null);
     setHolding(true);
-    timer.current = setTimeout(() => void send(), HOLD_MS);
+    timer.current = setTimeout(send, HOLD_MS);
   };
 
   const cancel = () => {
@@ -113,22 +111,18 @@ export function CheckInCard({ checkIn, elderView, elderName, timeZone, onSaved }
   const { announce } = usePreferences();
   const [editing, setEditing] = useState(false);
   const [note, setNote] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const { error, run } = useAction();
   const noteId = useId();
   const moodWord = (mood: Mood) => (language === 'en' ? t(`mood.${mood}`).toLowerCase() : t(`mood.${mood}`));
 
-  const save = async (mood: Mood) => {
-    setError(null);
-    try {
+  const save = (mood: Mood) =>
+    void run(async () => {
       await api.post('/checkin', { mood, note });
       announce(t('checkin.saved', { mood: moodWord(mood) }));
       setEditing(false);
       setNote('');
       onSaved();
-    } catch (err) {
-      setError(messageOf(err));
-    }
-  };
+    });
 
   if (!elderView) {
     return (
@@ -175,7 +169,7 @@ export function CheckInCard({ checkIn, elderView, elderName, timeZone, onSaved }
                 type="button"
                 className="mood-button"
                 data-mood={mood}
-                onClick={() => void save(mood)}
+                onClick={() => save(mood)}
               >
                 <span className="mood-face" aria-hidden="true">
                   {MOOD_FACE[mood]}

@@ -4,7 +4,7 @@ import { Link, useParams } from 'react-router';
 import type { VisitBriefResponse } from '../../../shared/api';
 import { localDate, localTime } from '../../../shared/time';
 import type { Appointment } from '../../../shared/types';
-import { api, ApiError, messageOf } from '../api/client';
+import { api } from '../api/client';
 import {
   AiNote,
   Dialog,
@@ -14,6 +14,7 @@ import {
   TextAreaField,
   TextField,
 } from '../components/ui';
+import { useAction } from '../hooks/useAction';
 import { usePreferences } from '../hooks/usePreferences';
 import { useResource } from '../hooks/useResource';
 import { canManage, useActiveSession } from '../hooks/useSession';
@@ -40,26 +41,16 @@ function AppointmentForm({
 }) {
   const { t } = useI18n();
   const [values, setValues] = useState(initial);
-  const [fields, setFields] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { error, fields, busy, run } = useAction();
   const set = (key: keyof ApptForm, value: string) => setValues((v) => ({ ...v, [key]: value }));
 
-  const submit = async (event: FormEvent) => {
+  const submit = (event: FormEvent) => {
     event.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      await onSubmit(values);
-    } catch (err) {
-      if (err instanceof ApiError) setFields(err.fields);
-      setError(messageOf(err));
-      setBusy(false);
-    }
+    void run(() => onSubmit(values));
   };
 
   return (
-    <form className="stack" onSubmit={(e) => void submit(e)} noValidate>
+    <form className="stack" onSubmit={submit} noValidate>
       <FormError message={error} />
       <TextField
         label={t('appts.doctor')}
@@ -205,7 +196,7 @@ export function Appointments() {
   const { announce } = usePreferences();
   const appts = useResource(() => api.get<{ items: Appointment[] }>('/appointments'), member.id);
   const [editing, setEditing] = useState<{ appt: Appointment | null } | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { error, run } = useAction();
   const manager = canManage(member);
   const [now] = useState(() => Date.now());
   const items = appts.data?.items ?? [];
@@ -220,14 +211,12 @@ export function Appointments() {
     await appts.reload();
   };
 
-  const remove = async (appt: Appointment) => {
+  const remove = (appt: Appointment) => {
     if (!window.confirm(t('appts.confirmDelete', { name: appt.doctor }))) return;
-    try {
+    void run(async () => {
       await api.delete(`/appointments/${appt.id}`);
       await appts.reload();
-    } catch (err) {
-      setError(messageOf(err));
-    }
+    });
   };
 
   const formFor = (appt: Appointment | null): ApptForm =>
